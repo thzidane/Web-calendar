@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head><title>My JavaScript Example</title>
+    <style>
+	body{
+	    background-color: antiquewhite;
+	}
+    </style>
+</head>
+<body>
+<div id = "login">
+<input type="text" id="username" placeholder="Username" />
+<input type="password" id="password" placeholder="Password" />
+<button id="login_btn">Log In</button><br>
+<form>
+<input type="text" id="registername" placeholder="Username" />
+<input type="password" id="registerpassword" placeholder="Password" />
+<button id="register_btn">Register</button><br>
+</form>
+</div>
+<div id="addEvent" style="display:none;" class="addevent">
+<input type="hidden" id = "secureToken" name="token" />
+Add event date in format yyyy-mm-dd<input type="text" id="add_date"/>
+Add event time in format hh:mm<input type="text" id="add_time" />
+Add event title<input type="text" id="add_event"/>
+<button id="add_event_btn">Add event</button><br>
+</div>
+<div id="deleteEvent" style="display:none;" class="deleteevent">   
+Delete an event with date in format yyyy-mm-dd<input type="text" id="delete_date"/>
+Delete an event with time in format hh:mm<input type="text" id="delete_time" />
+<button id="delete_event_btn">Delete event</button><br>
+</div>
+<div id="updateEvent" style="display:none;" class="updateevent">   
+Modify the event with date in format yyyy-mm-dd<input type="text" id="originaldate"/>
+Time in format hh:mm<input type="text" id="originaltime" />
+Change the event to date in format yyyy-mm-dd<input type="text" id="update_date"/>
+Time in format hh:mm<input type="text" id="update_time"/>
+Event<input type="text" id="update_event"/>
+<button id="update_event_btn">Update event</button><br>
+</div>
+<div id="groupEvent" style="display:none;" class="groupevent">   
+Add a group event with date in format yyyy-mm-dd<input type="text" id="group_date"/>
+Group event with time in format hh:mm<input type="text" id="group_time" />
+Group event title<input type="text" id="group_event"/>
+Add one username<input type="text" id="group_username"/>
+<button id="group_event_btn">Group event</button><br>
+</div>
+<div id="shareCalendar" style="display: none;" class="shareCalendar">
+share calendar with username<input type="text" id="share_user" >
+<button id="share_calendar_btn">Share calendar</button><br>
+</div>
+<div id="recurEvent" style="display: none;" class="recurEvents">
+Add a recurring event on day (0 for Sunday 1 for Monday and so on) <input type="text" id="recur_day"/>
+recurring time in format hh:mm<input type="text" id="recur_time"/>
+recurring event title<input type="text" id="recur_event"/>
+<button id="recur_event_btn">Recurring event</button><br>
+</div>
+<button id="prev_month_btn">Prev Month</button>
+<button id="next_month_btn">Next Month</button>
+<p id="year"></p>
+<p id="month"></p>
+<table style="width:1200px;table-layout:fixed" border="1" cellpadding ="24">
+  <tr>
+    <th>Sunday</th>
+    <th>Monday</th>
+    <th>Tuesday</th>
+    <th>Wednesday</th>
+    <th>Thursday</th>
+    <th>Friday</th>
+    <th>Saturday</th>
+  </tr>
+  <tr>
+    <td id=date00></td>
+    <td id=date01></td>
+    <td id=date02></td>
+    <td id=date03></td>
+    <td id=date04></td>
+    <td id=date05></td>
+    <td id=date06></td>
+  </tr>
+  <tr>
+    <td id=date10></td>
+    <td id=date11></td>
+    <td id=date12></td>
+    <td id=date13></td>
+    <td id=date14></td>
+    <td id=date15></td>
+    <td id=date16></td>
+  </tr>
+  <tr>
+    <td id=date20></td>
+    <td id=date21></td>
+    <td id=date22></td>
+    <td id=date23></td>
+    <td id=date24></td>
+    <td id=date25></td>
+    <td id=date26></td>
+  </tr>
+  <tr>
+    <td id=date30></td>
+    <td id=date31></td>
+    <td id=date32></td>
+    <td id=date33></td>
+    <td id=date34></td>
+    <td id=date35></td>
+    <td id=date36></td>
+  </tr>
+  <tr>
+    <td id=date40></td>
+    <td id=date41></td>
+    <td id=date42></td>
+    <td id=date43></td>
+    <td id=date44></td>
+    <td id=date45></td>
+    <td id=date46></td>
+  </tr>
+  <tr id="lastweek">
+    <td id=date50></td>
+    <td id=date51></td>
+    <td id=date52></td>
+    <td id=date53></td>
+    <td id=date54></td>
+    <td id=date55></td>
+    <td id=date56></td>
+  </tr>
+</table>
+<script type="text/javascript">
+
+var login = 0;
+var dateString;
+var to;
+var message;
+    // ajax.js
+function loginAjax(event){
+	var username = document.getElementById("username").value; // Get the username from the form
+	var password = document.getElementById("password").value; // Get the password from the form
+	// Make a URL-encoded string for passing POST data:
+	var dataString = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5login_ajax.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	xmlHttp.addEventListener("load", function(event){
+		var jsonData = JSON.parse(event.target.responseText); // parse the JSON into a JavaScript object
+		if(jsonData.success){  // in PHP, this was the "success" key in the associative array; in JavaScript, it's the .success property of jsonData
+			alert("You've been Logged In!");
+                        login = 1;
+                        document.getElementById('addEvent').style.display = "block";
+                        document.getElementById('deleteEvent').style.display = "block";
+                        document.getElementById('updateEvent').style.display = "block";
+                        document.getElementById('groupEvent').style.display = "block";
+                        document.getElementById('shareCalendar').style.display = "block";
+                        document.getElementById('recurEvent').style.display = "block";
+                        document.getElementById('login').style.display = "none";
+                        document.getElementById('secureToken').value = jsonData.token;
+                        fetchEvent();
+                        fetchrecursiveEvent();
+		}else{
+			alert("You were not logged in.  "+jsonData.message);
+		}
+	}, false); // Bind the callback to the load event
+	xmlHttp.send(dataString); // Send the data
+}
+function registerAjax(event){
+	var registername = document.getElementById("registername").value; // Get the username from the form
+	var registerpassword = document.getElementById("registerpassword").value; // Get the password from the form
+	var dataString = "registername=" + encodeURIComponent(registername) + "&registerpassword=" + encodeURIComponent(registerpassword);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5register.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've registered successfully!");
+        xmlHttp.send(dataString); // Send the data
+        document.getElementById("registername").reset();
+        document.getElementById("registerpassword").reset();
+}
+function addeventAjax(event){
+	var addDate = document.getElementById("add_date").value; 
+	var addTime = document.getElementById("add_time").value;
+        var addEvent = document.getElementById("add_event").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "addDate=" + encodeURIComponent(addDate) + "&addTime=" + encodeURIComponent(addTime) +"&addEvent=" + encodeURIComponent(addEvent) + "&token=" + encodeURIComponent(token);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5addevent.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've added an event!");
+        xmlHttp.send(dataString);
+        updateCalendar();
+}
+function delete_eventAjax(event){
+	var deleteDate = document.getElementById("delete_date").value; 
+	var deleteTime = document.getElementById("delete_time").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "deleteDate=" + encodeURIComponent(deleteDate) + "&deleteTime=" + encodeURIComponent(deleteTime) + "&token=" + encodeURIComponent(token);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5deleteevent.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've deleted an event!");
+        xmlHttp.send(dataString); // Send the data
+        updateCalendar();
+}
+function update_eventAjax(event){
+	var originalDate = document.getElementById("originaldate").value; 
+	var originalTime = document.getElementById("originaltime").value;
+        var updateDate = document.getElementById("update_date").value;
+        var updateTime = document.getElementById("update_time").value;
+        var updateEvent = document.getElementById("update_event").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "originalDate=" + encodeURIComponent(originalDate) + "&originalTime=" + encodeURIComponent(originalTime) + "&updateDate=" + encodeURIComponent(updateDate) + "&updateTime=" + encodeURIComponent(updateTime) + "&updateEvent=" + encodeURIComponent(updateEvent) +"&token=" + encodeURIComponent(token);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5modify.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've updated an event!");
+        xmlHttp.send(dataString); // Send the data
+        updateCalendar();
+}
+
+document.getElementById("login_btn").addEventListener("click", loginAjax, false); // Bind the AJAX call to button click
+document.getElementById("register_btn").addEventListener("click", registerAjax, false);
+document.getElementById("add_event_btn").addEventListener("click", addeventAjax, false);
+document.getElementById("delete_event_btn").addEventListener("click", delete_eventAjax, false);
+document.getElementById("update_event_btn").addEventListener("click", update_eventAjax, false);
+</script>
+
+<script type="text/javascript">
+    // creative portion add group event
+    function addgroupventAjax(event){
+	var addDate = document.getElementById("group_date").value; 
+	var addTime1 = document.getElementById("group_time").value;
+	var addTime = addTime1 +":00";
+        var addEvent = document.getElementById("group_event").value;
+	var addUsername = document.getElementById("group_username").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "addDate=" + encodeURIComponent(addDate) + "&addTime=" + encodeURIComponent(addTime) +"&addEvent=" + encodeURIComponent(addEvent) + "&addUsername="+encodeURIComponent(addUsername)+"&token=" + encodeURIComponent(token);
+	alert(dataString);
+        var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5addgroupevent.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've added a group event with " + addUsername +"!");
+        xmlHttp.send(dataString);
+        updateCalendar();
+}
+document.getElementById("group_event_btn").addEventListener("click", addgroupventAjax, false);
+</script>
+
+<script type="text/javascript">
+    // creative portion share calendar with additional users
+    function shareCalendarAjax(event){
+	var shareUser = document.getElementById("share_user").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "shareUser=" + encodeURIComponent(shareUser) +"&token=" + encodeURIComponent(token);
+	var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5share.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've shared your calendar with " + shareUser + "!");
+        xmlHttp.send(dataString);
+        updateCalendar();
+}
+document.getElementById("share_calendar_btn").addEventListener("click", shareCalendarAjax, false);
+</script>
+
+<script type="text/javascript">
+    // creative portion recurring event on day
+    function recureventAjax(event){
+	var recurDay = document.getElementById("recur_day").value; 
+	var recurTime1 = document.getElementById("recur_time").value;
+	var recurTime = recurTime1 +":00";
+        var recurEvent = document.getElementById("recur_event").value;
+        var token = document.getElementById("secureToken").value;
+	var dataString = "recurDay=" + encodeURIComponent(recurDay) + "&recurTime=" + encodeURIComponent(recurTime) +"&recurEvent=" + encodeURIComponent(recurEvent) +"&token=" + encodeURIComponent(token);
+	alert(dataString);
+        var xmlHttp = new XMLHttpRequest(); // Initialize our XMLHttpRequest instance
+	xmlHttp.open("POST", "module5recur.php", true); // Starting a POST request (NEVER send passwords as GET variables!!!)
+	xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // It's easy to forget this line for POST requests
+	alert("You've added a recurring event!");
+        xmlHttp.send(dataString);
+        updateCalendar();
+}
+document.getElementById("recur_event_btn").addEventListener("click", recureventAjax, false);
+</script>
+
+<script type="text/javascript">
+function fetchEvent() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET","module5showevent.php",true);
+    xmlHttp.addEventListener("load",ajaxCallback,false);
+    xmlHttp.send(null);
+}
+
+function ajaxCallback(event) {
+   var jsonData = JSON.parse(event.target.responseText);
+   var count = jsonData.cnt;
+   for(var j=0;j<count;j++){
+    var dateNumber = "date" + j;
+    var timeNumber = "time" + j;
+    var infoNumber  = "info" + j;
+    dateString = jsonData[dateNumber];
+    to = jsonData[timeNumber];
+    message = jsonData[infoNumber];
+    updateloginCalendar();
+   }
+}
+</script>
+
+<script type="text/javascript">
+function fetchrecursiveEvent() {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET","module5showrecur.php",true);
+    xmlHttp.addEventListener("load",recursiveajaxCallback,false);
+    xmlHttp.send(null);
+}
+
+function recursiveajaxCallback(event) {
+   var jsonData = JSON.parse(event.target.responseText);
+   var count = jsonData.cnt;
+   for(var j=0;j<count;j++){
+    var dayNumber = "day" + j;
+    var timeNumber = "time" + j;
+    var infoNumber  = "info" + j;
+    dateString = jsonData[dayNumber];
+    to = jsonData[timeNumber];
+    message = jsonData[infoNumber];
+    updaterecursiveCalendar();
+   }
+}
+</script>
+
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", updateCalendar, false);
+(function(){Date.prototype.deltaDays=function(c){
+    return new Date(this.getFullYear(),this.getMonth(),this.getDate()+c)
+    };
+    Date.prototype.getSunday=function(){
+    return this.deltaDays(-1*this.getDay())
+    }
+    })();
+function Week(c){
+    this.sunday=c.getSunday();
+    this.nextWeek=function(){
+        return new Week(this.sunday.deltaDays(7))
+        };
+    this.prevWeek=function(){
+            return new Week(this.sunday.deltaDays(-7))
+        };
+    this.contains=function(b){
+    return this.sunday.valueOf()===b.getSunday().valueOf()
+    };
+    this.getDates=function(){
+        for(var b=[],a=0;7>a;a++)b.push(this.sunday.deltaDays(a));
+        return b}
+}
+function Month(c,b){
+    this.year=c;this.month=b;
+    this.nextMonth=function(){
+        return new Month(c+Math.floor((b+1)/12),(b+1)%12)
+    };
+    this.prevMonth=function(){
+        return new Month(c+Math.floor((b-1)/12),(b+11)%12)
+    };
+    this.getDateObject=function(a){
+        return new Date(this.year,this.month,a)
+    };
+    this.getWeeks=function(){
+        var a=this.getDateObject(1),b=this.nextMonth().getDateObject(0),c=[],a=new Week(a);
+        for(c.push(a);!a.contains(b);)a=a.nextWeek(),c.push(a);
+        return c}
+};
+// For our purposes, we can keep the current month in a variable in the global scope
+var currentMonth = new Month(2014, 9); // October 2014
+ 
+// Change the month when the "next" button is pressed
+document.getElementById("next_month_btn").addEventListener("click", function(event){
+        currentMonth = currentMonth.nextMonth(); // Previous month would be currentMonth.prevMonth()
+	updateCalendar(); // Whenever the month is updated, we'll need to re-render the calendar in HTML
+}, false);
+ 
+document.getElementById("prev_month_btn").addEventListener("click", function(event){
+	currentMonth = currentMonth.prevMonth(); // Previous month would be currentMonth.prevMonth()
+	updateCalendar(); // Whenever the month is updated, we'll need to re-render the calendar in HTML
+}, false);
+
+function updateCalendar(){
+	var weeks = currentMonth.getWeeks();
+        var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        var months1 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        var m = months[currentMonth.month];
+        document.getElementById('year').innerHTML = currentMonth.year;
+        document.getElementById('month').innerHTML = m;
+        if (login==1) {
+           var count = weeks.length;
+           if (count==6) {
+            document.getElementById('lastweek').style.display = "table-row";
+           }else{
+            document.getElementById('lastweek').style.display = "none";
+           }
+            for(var w in weeks){
+		var days = weeks[w].getDates();
+                    for(var d in days){
+                        var r = "date" + w + d;
+                        var g = days[d].getDate();
+                        var b = months1[days[d].getMonth()];
+                        document.getElementById(r).innerHTML = b + " " + g; 	
+		} 
+	}
+        fetchEvent();
+        fetchrecursiveEvent();
+        }else{
+           var count = weeks.length;
+           if (count==6) {
+            document.getElementById('lastweek').style.display = "table-row";
+           }else{
+            document.getElementById('lastweek').style.display = "none";
+           }
+           for(var w in weeks){
+		var days = weeks[w].getDates();
+                    for(var d in days){
+                        var r = "date" + w + d;
+                        var g = days[d].getDate();
+                        var b = months1[days[d].getMonth()];
+                        document.getElementById(r).innerHTML = b + " " + g; 	
+		}
+	} 
+        }
+}
+function updateloginCalendar(){
+	var weeks = currentMonth.getWeeks();
+        var dates = ["01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"];
+        var months2 = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+	for(var w in weeks){
+		var days = weeks[w].getDates();
+		for(var d in days){
+                        var r = "date" + w + d;
+                        var g = days[d].getDate();
+                        var loginYear = days[d].getFullYear();
+                        var loginDatenumber = dates[g-1];
+                        var loginMonth = months2[days[d].getMonth()];
+                        var loginDate = loginYear + "-" + loginMonth + "-" + loginDatenumber;
+                        if (loginDate==dateString) {
+                           document.getElementById(r).innerHTML+= "<br>" + to + " " +message;
+                        }	
+		}
+	}
+}
+function updaterecursiveCalendar(){
+	var weeks = currentMonth.getWeeks();
+	for(var w in weeks){
+		var days = weeks[w].getDates();
+		for(var d in days){
+                        var r = "date" + w + d;
+                        var g = days[d].getDay();
+                        if (g==dateString) {
+                           document.getElementById(r).innerHTML+= "<br>" + to + " " +message;
+                        }	
+		}
+	}
+}
+</script>
+</body>
+</html>
